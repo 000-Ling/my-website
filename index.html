@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>一封信 · A Letter</title>
+<style>
+  :root{
+    /* —— 配色：牛皮纸 + 奶油纸 + 酒红圆点 —— */
+    --kraft-1:#cbb08a;
+    --kraft-2:#bda07a;
+    --kraft-3:#b0936d;
+    --kraft-dk:#8f7350;
+    --paper:#fbf7ec;
+    --paper-2:#f3ecdb;
+    --ink:#3a322a;
+    --ink-2:#6d6255;
+    --red:#9c3a33;
+    --red-2:#b8504a;
+    --hl:#efd7a0;
+
+    /* —— 尺寸 —— */
+    --ew:560px; --eh:370px; --et:92px;
+    --env-l:220px; --env-t:435px;
+    --lw:466px; --lh:750px;
+
+    --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    --noise-paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p)' opacity='0.10'/%3E%3C/svg%3E");
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(115% 85% at 50% 12%, #f7f3ec 0%, #eee7dc 48%, #e2d8c9 100%);
+    color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::after{ /* 台面的一点暗角 */
+    content:""; position:fixed; inset:0; pointer-events:none;
+    background:radial-gradient(70% 60% at 50% 48%, transparent 40%, rgba(94,76,52,.14) 100%);
+  }
+
+  /* ========== 视口 ========== */
+  .viewport{position:fixed; inset:0; overflow:hidden;}
+  .scene{
+    position:absolute; left:50%; top:50%;
+    margin:-500px 0 0 -500px;
+    width:1000px; height:1000px;
+    transform-origin:center center;
+    rotate:-1deg;
+  }
+
+  /* ========== 信封 ========== */
+  .env-shadow{
+    position:absolute; left:236px; top:790px; width:510px; height:96px;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(74,56,34,.34), rgba(74,56,34,0) 72%);
+    filter:blur(6px); z-index:0;
+  }
+
+  .env-back{
+    position:absolute; left:var(--env-l); top:var(--env-t);
+    width:var(--ew); height:var(--eh);
+    border-radius:12px;
+    background:linear-gradient(168deg, var(--kraft-1), var(--kraft-2) 46%, var(--kraft-3));
+    box-shadow:0 18px 34px -14px rgba(72,52,30,.42), 0 2px 0 rgba(255,255,255,.35) inset;
+    z-index:1;
+  }
+
+  .env-lining{
+    position:absolute; left:var(--env-l); top:var(--env-t);
+    width:var(--ew); height:var(--eh);
+    border-radius:12px;
+    background-color:#fdfaf1;
+    background-image:
+      linear-gradient(180deg, rgba(58,42,26,.20) 0%, rgba(58,42,26,.03) 46%, rgba(58,42,26,.10) 100%),
+      radial-gradient(circle, rgba(150,52,45,.78) 1.5px, rgba(150,52,45,0) 1.85px);
+    background-size:100% 100%, 17px 17px;
+    background-repeat:no-repeat, repeat;
+    background-position:0 0, 7px 9px;
+    z-index:2;
+  }
+
+  .env-front{
+    position:absolute; left:var(--env-l); top:var(--env-t);
+    width:var(--ew); height:var(--eh);
+    border-radius:0 0 12px 12px;
+    overflow:hidden;
+    z-index:4;
+    box-shadow:0 20px 38px -16px rgba(72,52,30,.46);
+  }
+  .front-clip{
+    position:absolute; inset:0;
+    background:linear-gradient(170deg, var(--kraft-1) 0%, var(--kraft-2) 40%, var(--kraft-3) 100%);
+  }
+  .tex{
+    position:absolute; inset:0;
+    background-image:var(--noise);
+    background-size:200px 200px;
+    mix-blend-mode:multiply;
+    opacity:.42;
+    pointer-events:none;
+  }
+
+  /* 信封正面上的字与贴纸 */
+  .addr{position:absolute; left:56px; top:186px;}
+  .addr .to{
+    font-family:"Segoe Script","Bradley Hand","STKaiti",cursive;
+    font-size:26px; letter-spacing:.5px; color:#33291d;
+  }
+  .addr .to i{font-style:normal; font-size:16px; opacity:.7; margin-right:6px; letter-spacing:1px}
+  .addr .date{
+    margin-top:9px; font-size:11px; letter-spacing:.22em;
+    color:rgba(58,45,28,.62); text-transform:uppercase;
+  }
+
+  .stamps{position:absolute; right:44px; top:118px; width:122px; height:78px;}
+  .stamp{
+    position:absolute; width:54px; height:64px;
+    border-radius:2px;
+    display:grid; place-items:center;
+    box-shadow:0 1px 2px rgba(70,50,30,.22);
+  }
+  .stamp.one{
+    left:0; top:2px; rotate:-2.5deg;
+    background:#f6f1e3;
+    background-image:radial-gradient(circle, rgba(150,52,45,.5) 1px, rgba(150,52,45,0) 1.2px);
+    background-size:8px 8px;
+    border:1px dashed rgba(120,88,56,.28);
+  }
+  .stamp.two{
+    left:60px; top:0; rotate:2deg;
+    background:linear-gradient(160deg,#e9ddc4,#d9c7a6);
+    border:1px dashed rgba(120,88,56,.28);
+  }
+  .stamp span{
+    font-size:9px; letter-spacing:.14em; color:rgba(92,68,42,.7);
+  }
+  .stamp.two b{
+    display:block; width:26px; height:2px; background:rgba(92,68,42,.35); margin-top:6px;
+  }
+  .postmark{
+    position:absolute; right:-2px; top:6px;
+    width:52px; height:52px; border-radius:50%;
+    border:1.5px solid rgba(156,58,51,.5);
+    color:rgba(156,58,51,.55);
+    font-size:8px; letter-spacing:.1em;
+    display:grid; place-items:center;
+    rotate:-14deg;
+    background:rgba(255,255,255,.06);
+  }
+  .postmark::before{
+    content:""; position:absolute; inset:6px;
+    border-radius:50%; border:1px solid rgba(156,58,51,.3);
+  }
+
+  /* 信封底部的折痕线 */
+  .foldlines{position:absolute; inset:0; pointer-events:none; opacity:.5}
+  .foldlines::before,.foldlines::after{
+    content:""; position:absolute; bottom:0; width:1px; height:calc(var(--eh) * .62);
+    background:linear-gradient(to top, rgba(122,94,60,.34), rgba(122,94,60,0));
+    transform-origin:bottom center;
+  }
+  .foldlines::before{left:0; rotate:14deg}
+  .foldlines::after{right:0; rotate:-14deg}
+
+  /* 封口小蜡印 */
+  .seal{
+    position:absolute; left:50%; top:calc(var(--eh) - 96px); width:34px; height:34px;
+    margin-left:-17px; border-radius:50%;
+    background:radial-gradient(circle at 34% 30%, #b5514a, #8c2f2a 62%, #742420);
+    box-shadow:0 2px 4px rgba(60,30,24,.4), inset 0 1px 2px rgba(255,255,255,.28);
+    opacity:.9;
+  }
+  .seal::after{
+    content:""; position:absolute; inset:8px; border-radius:50%;
+    border:1px solid rgba(255,225,215,.28);
+  }
+
+  /* ========== 撕条（从右往左撕，撕下来的部分翻折 180° 盖在正面） ========== */
+  .strip{
+    position:absolute; left:var(--env-l); top:var(--env-t);
+    width:var(--ew); height:calc(var(--et) + 16px);
+    border-radius:12px 12px 0 0;
+    overflow:hidden;
+    z-index:6;
+    filter:drop-shadow(0 4px 8px rgba(56,38,20,var(--sa,0)));
+  }
+  .strip-clip{
+    position:absolute; inset:0;
+  }
+  .remain{
+    position:absolute; inset:0;
+    background:linear-gradient(176deg, #cdb38f 0%, var(--kraft-2) 48%, var(--kraft-3) 100%);
+  }
+  .folded-wrap{
+    position:absolute; left:var(--env-l); top:var(--env-t);
+    width:var(--ew); height:200px;
+    z-index:5; pointer-events:none;
+  }
+  .folded{
+    position:absolute; left:0; top:0;
+    width:100%; height:calc(var(--et));
+    transform-origin:50% 100%;
+    transform:perspective(900px) rotateX(calc(var(--foldA, 172) * 1deg));
+    transition:transform .24s cubic-bezier(.3,.7,.2,1);
+    filter:drop-shadow(0 7px 9px rgba(52,36,18,.34));
+  }
+  .folded-inner{
+    position:absolute; inset:0;
+    overflow:hidden;
+    border-radius:0 0 3px 3px;
+    background:linear-gradient(180deg, #c0a37b 0%, #c1a480 62%, #b79a72 100%);
+    box-shadow:
+      inset 0 -20px 22px -16px rgba(48,32,14,.5),   /* 贴着折线的暗部 */
+      inset 0 -1.5px 0 rgba(58,40,18,.26);
+  }
+  /* 自由端（被撕断后翻下来的那条边）：纸的裁边，压一条实色遮住夹缝 */
+  .folded-inner::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:3px;
+    background:linear-gradient(180deg, #cfb692 0%, #c2a57e 100%);
+    box-shadow:0 1px 0 rgba(56,38,18,.22);
+  }
+  .folded-inner .tex{opacity:.30}
+  .strip-clip .micro{
+    position:absolute; left:0; right:0; top:56px;
+    text-align:center;
+    font-size:9px; letter-spacing:.42em; text-transform:uppercase;
+    color:rgba(96,72,44,.38);
+    font-family:"Microsoft YaHei",sans-serif;
+  }
+  .strip-clip .marks{
+    position:absolute; left:0; right:0; top:8px; height:2px;
+    background-image:repeating-linear-gradient(90deg, rgba(255,255,255,.34) 0 9px, transparent 9px 19px);
+    opacity:.5;
+  }
+  .remain::after{ /* 撕条上的一点点高光 */
+    content:""; position:absolute; left:0; right:0; top:0; height:34%;
+    background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0));
+  }
+
+  /* 撕口接缝 */
+  .seam{position:absolute; left:var(--env-l); top:var(--env-t); z-index:6; pointer-events:none;}
+  .seam path{fill:none; stroke:rgba(92,68,40,.20); stroke-width:1; stroke-dasharray:1.6 5.6;}
+  .seam.torn path{
+    stroke:rgba(250,245,232,.55); stroke-width:1; stroke-dasharray:none;
+    filter:drop-shadow(0 1px 1px rgba(80,56,30,.28));
+  }
+
+  /* 拖动热区 */
+  .strip-hit{
+    position:absolute; left:var(--env-l); top:calc(var(--env-t) - 26px);
+    width:var(--ew); height:calc(var(--et) + 34px);
+    z-index:8; cursor:grab; touch-action:none;
+    border-radius:14px;
+  }
+  .strip-hit.gone{pointer-events:none; opacity:0}
+
+  /* drag 贴纸 */
+  .drag-tag{
+    position:absolute; left:calc(var(--env-l) + var(--ew) - 18px); top:calc(var(--env-t) - 34px);
+    padding:5px 9px 4px; border-radius:3px;
+    background:#f4efe3;
+    font-family:"Segoe Script","Bradley Hand",cursive;
+    font-size:14px; color:#4a3b28;
+    rotate:-6deg;
+    box-shadow:0 3px 8px -3px rgba(70,50,28,.4);
+    z-index:9;
+    transition:opacity .4s, translate .4s;
+    animation:tagFloat 2.6s ease-in-out infinite;
+  }
+  .drag-tag .ar{display:inline-block; margin-left:5px; font-size:15px}
+  .drag-tag.gone{opacity:0; translate:0 -14px}
+  @keyframes tagFloat{0%,100%{translate:0 0}50%{translate:0 -5px}}
+
+  /* 开信提醒光圈 */
+  .open-glow{
+    position:absolute; left:var(--env-l); top:var(--env-t);
+    width:var(--ew); height:var(--eh);
+    border-radius:14px; z-index:7; pointer-events:none;
+    opacity:0; transition:opacity .5s;
+    box-shadow:0 0 0 0 rgba(255,255,255,0);
+  }
+  .open-glow.on{
+    opacity:1;
+    animation:glowPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes glowPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,252,242,.0), 0 0 26px 0 rgba(255,250,236,.0)}
+    50%{box-shadow:0 0 0 6px rgba(255,252,242,.30), 0 0 40px 6px rgba(255,248,230,.34)}
+  }
+
+  /* ========== 信纸 ========== */
+  .letter{
+    position:absolute; left:267px; top:0;
+    width:var(--lw); height:var(--lh);
+    z-index:3;
+    translate:0 250px;
+    will-change:translate;
+  }
+  .letter.out{z-index:6}
+
+  .stack{position:absolute; inset:0; pointer-events:none}
+  .stack-sheet{
+    position:absolute; left:50%; top:50%;
+    width:482px; height:762px; margin:-381px 0 0 -241px;
+    border-radius:3px;
+    background:
+      var(--noise),
+      linear-gradient(160deg, var(--paper), var(--paper-2));
+    background-size:200px 200px, 100% 100%;
+    box-shadow:0 10px 24px -12px rgba(70,50,26,.4);
+    opacity:0;
+  }
+  .stack-sheet:nth-child(1){opacity:0}
+  .stack-sheet:nth-child(2){opacity:0}
+
+  .sheet{
+    position:absolute; inset:0;
+    perspective:1400px;
+    transform-style:preserve-3d;
+  }
+
+  .panel{
+    position:absolute; left:0; width:100%; height:calc(var(--lh) / 3);
+    transform-style:preserve-3d;
+    transform-origin:50% 100%;
+  }
+  .p1{top:0; rotate:x 180deg; z-index:3}
+  .p2{top:calc(var(--lh) / 3); z-index:1}
+  .p3{top:calc(var(--lh) / 3 * 2); transform-origin:50% 0%; rotate:x -180deg; z-index:2}
+
+  .side{
+    position:absolute; inset:0;
+    overflow:hidden;
+    border-radius:2px;
+    background-image:
+      var(--noise-paper),
+      radial-gradient(circle, rgba(156,58,51,.30) 1.5px, rgba(156,58,51,0) 1.9px),
+      linear-gradient(180deg, #fcf8f1 0%, #faf5e8 100%);
+    background-size:300px 300px, 19px 19px, 100% 100%;
+    background-repeat:repeat, repeat, no-repeat;
+    background-position:0 0, 5px 6px, 0 0;
+    box-shadow:inset 0 7px 9px -9px rgba(110,86,56,.42), inset 0 -7px 9px -9px rgba(110,86,56,.42);
+    transition:opacity .13s linear;
+  }
+  .side.fold{opacity:0}
+  .p1 .side.blank,.p3 .side.blank{opacity:1}
+  .p1.flat .side.blank,.p3.flat .side.blank{opacity:0}
+  .p1 .side.text,.p3 .side.text{opacity:0}
+  .p1.flat .side.text,.p3.flat .side.text{opacity:1}
+  .p2 .side.blank{display:none}
+
+  .shade{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(48,34,18,.55), rgba(48,34,18,.15));
+    opacity:0; border-radius:2px;
+  }
+
+  /* 信纸内容 */
+  .slice{
+    position:absolute; inset:0;
+    padding:36px 46px;
+    display:flex; flex-direction:column; justify-content:center;
+    font-family:"KaiTi","STKaiti","Kaiti SC","Songti SC",serif;
+    color:var(--ink);
+  }
+  .kicker{
+    font-family:"Microsoft YaHei",sans-serif;
+    font-size:10.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:rgba(58,45,28,.5);
+    margin-bottom:16px;
+  }
+  .title{
+    font-size:27px; font-weight:400; letter-spacing:.18em;
+    margin-bottom:20px; color:#2f2820;
+  }
+  .body{
+    font-size:16px; line-height:1.85; letter-spacing:.04em;
+    color:#3c3329;
+    margin-bottom:16px;
+  }
+  .body:last-child{margin-bottom:0}
+  .hl{
+    background-image:linear-gradient(to right, var(--hl), var(--hl));
+    background-repeat:no-repeat;
+    background-position:0 78%;
+    background-size:0% 58%;
+    padding:0 1px;
+    -webkit-box-decoration-break:clone;
+    box-decoration-break:clone;
+  }
+  .sign{
+    margin-top:24px; text-align:right;
+    font-size:16px; letter-spacing:.05em; color:#4a3c2c;
+  }
+  .ps{
+    margin-top:26px; font-size:13px; line-height:1.8;
+    color:var(--ink-2); letter-spacing:.03em;
+  }
+  .rule{
+    height:1px; margin:0 0 20px;
+    background:repeating-linear-gradient(90deg, rgba(120,96,64,.3) 0 6px, transparent 6px 12px);
+  }
+
+  /* 折叠时的封面（独立贴在上面，保证字不倒） */
+  .packet-cover{
+    position:absolute; left:0; top:calc(var(--lh) / 3);
+    width:100%; height:calc(var(--lh) / 3);
+    z-index:5;
+    border-radius:2px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background-image:
+      var(--noise-paper),
+      radial-gradient(circle, rgba(156,58,51,.30) 1.5px, rgba(156,58,51,0) 1.9px),
+      linear-gradient(180deg, #fcf8f1 0%, #faf5e8 100%);
+    background-size:300px 300px, 19px 19px, 100% 100%;
+    background-repeat:repeat, repeat, no-repeat;
+    background-position:0 0, 5px 6px, 0 0;
+    box-shadow:0 10px 22px -14px rgba(70,50,26,.5), inset 0 12px 14px -12px rgba(80,58,34,.34);
+  }
+  .packet-cover .c-to{
+    font-family:"Segoe Script","Bradley Hand",cursive;
+    font-size:15px; color:rgba(58,45,28,.55); letter-spacing:.1em;
+  }
+  .packet-cover .c-name{
+    font-family:"Segoe Script","Bradley Hand",cursive;
+    font-size:38px; color:#33291d; line-height:1.1;
+  }
+  .packet-cover .c-line{
+    width:56px; height:1px; margin:8px 0 10px;
+    background:rgba(120,92,60,.45);
+  }
+  .packet-cover .c-hint{
+    font-family:"Microsoft YaHei",sans-serif;
+    font-size:10px; letter-spacing:.26em; text-transform:uppercase;
+    color:rgba(58,45,28,.4);
+  }
+
+  /* ========== 界面文字 ========== */
+  .hintbar{
+    position:fixed; left:0; right:0; bottom:34px;
+    text-align:center; pointer-events:none;
+  }
+  .hint{
+    display:inline-block;
+    font-size:13px; letter-spacing:.14em;
+    color:rgba(58,45,28,.55);
+    transition:opacity .5s, translate .5s;
+    translate:0 0;
+  }
+  .hint.gone{opacity:0; translate:0 8px}
+  .hint .dot{opacity:.5; margin:0 8px}
+
+  .sound{
+    position:fixed; right:26px; bottom:26px;
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid rgba(58,45,28,.16);
+    background:rgba(255,252,244,.6);
+    color:rgba(58,45,28,.6);
+    font-size:14px; cursor:pointer;
+    backdrop-filter:blur(6px);
+    transition:all .3s;
+  }
+  .sound:hover{background:rgba(255,252,244,.9); color:rgba(58,45,28,.9)}
+  .sound.off{opacity:.4}
+
+  .again{
+    position:fixed; left:50%; bottom:30px; translate:-50% 0;
+    padding:8px 18px; border-radius:20px;
+    border:1px solid rgba(58,45,28,.18);
+    background:rgba(255,252,244,.72);
+    color:rgba(58,45,28,.72);
+    font-size:12.5px; letter-spacing:.1em; cursor:pointer;
+    opacity:0; pointer-events:none;
+    transition:opacity .6s .2s, background .3s;
+    backdrop-filter:blur(6px);
+  }
+  .again.show{opacity:1; pointer-events:auto}
+  .again:hover{background:rgba(255,252,244,.95)}
+</style>
+</head>
+<body>
+
+<div class="viewport">
+  <div class="scene" id="scene">
+
+    <div class="env-shadow" id="envShadow"></div>
+
+    <!-- ① 信封背面 -->
+    <div class="env-back" id="envBack"><span class="tex"></span></div>
+
+    <!-- ② 内衬（撕开后露出的圆点纸） -->
+    <div class="env-lining" id="envLining"></div>
+
+    <!-- ③ 信纸（夹在内衬与正面之间） -->
+    <div class="letter" id="letter">
+      <div class="stack" id="stack">
+        <div class="stack-sheet"></div>
+        <div class="stack-sheet"></div>
+      </div>
+
+      <div class="sheet" id="sheet">
+
+        <div class="panel p1" id="p1">
+          <div class="side blank"></div>
+          <div class="side text">
+            <div class="slice">
+              <div class="kicker">November 5, 2026</div>
+              <h2 class="title">见字如面</h2>
+              <p class="body">把想说的话折了三折，<br>塞进这只牛皮纸信封里。</p>
+            </div>
+          </div>
+          <div class="shade" id="shade1"></div>
+        </div>
+
+        <div class="panel p2 flat" id="p2">
+          <div class="side text">
+            <div class="slice">
+              <p class="body">十一月的风很轻，落在纸上<br>像一层薄薄的糖霜。</p>
+              <p class="body">写信这件事，也许是<br>把时间<span class="hl">慢慢叠起来</span>，<br>再交到另一个人手上。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel p3" id="p3">
+          <div class="side blank"></div>
+          <div class="side text">
+            <div class="slice">
+              <p class="body">愿你拆开它的时候，<br>也是这样的好天气。</p>
+              <div class="rule"></div>
+              <div class="sign">— 一点点想你的人</div>
+              <div class="ps">P.S. 纸是有纹路的，像那天下午的光。</div>
+            </div>
+          </div>
+          <div class="shade" id="shade3"></div>
+        </div>
+
+      </div>
+
+      <div class="packet-cover" id="packetCover">
+        <div class="c-to">To</div>
+        <div class="c-name">Mr.Lee</div>
+        <div class="c-line"></div>
+        <div class="c-hint">pull the paper out</div>
+      </div>
+    </div>
+
+    <!-- ④ 信封正面 -->
+    <div class="env-front" id="envFront">
+      <div class="front-clip" id="frontClip">
+        <span class="tex"></span>
+        <div class="stamps">
+          <div class="stamp one"><span>2.00</span></div>
+          <div class="stamp two"><span>post<b></b></span></div>
+          <div class="postmark">5 · XI</div>
+        </div>
+        <div class="addr">
+          <div class="to"><i>To:</i>Mr.Lee</div>
+          <div class="date">November 5, 2026</div>
+        </div>
+        <div class="foldlines"></div>
+      </div>
+    </div>
+
+    <!-- ⑤ 撕条：右端先起，撕下来的部分翻折 180° 盖在信封正面 -->
+    <div class="folded-wrap" id="foldedWrap">
+      <div class="folded" id="folded">
+        <div class="folded-inner" id="foldedInner"><span class="tex"></span></div>
+      </div>
+    </div>
+
+    <div class="strip" id="strip">
+      <div class="strip-clip" id="stripClip">
+        <div class="remain" id="stripRemain">
+          <span class="tex"></span>
+          <span class="marks"></span>
+          <span class="micro">tear from the right</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 接缝 -->
+    <svg class="seam" id="seam" width="560" height="370" viewBox="0 0 560 370" preserveAspectRatio="none"></svg>
+
+    <div class="strip-hit" id="stripHit"></div>
+    <div class="drag-tag" id="dragTag">drag<span class="ar">←</span></div>
+    <div class="open-glow" id="openGlow"></div>
+
+  </div>
+</div>
+
+<div class="hintbar">
+  <p class="hint" id="hint">从右往左拖动，撕开封条<span class="dot">·</span>drag to open</p>
+</div>
+
+<button class="sound" id="soundBtn" title="声音">♪</button>
+<button class="again" id="againBtn">再看一遍 ↺</button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= 常量 ================= */
+  const EW = 560, EH = 370, ET = 92;      // 信封宽高、撕条高度
+  const ENV_L = 220, ENV_T = 435;         // 信封在 1000×1000 舞台中的位置
+  const SEED = 11;                        // 固定种子：每次刷新锯齿形状一致
+
+  const $ = id => document.getElementById(id);
+  const scene   = $('scene');
+  const strip   = $('strip');
+  const stripClip = $('stripClip');
+  const stripRemain = $('stripRemain');
+  const foldedWrap = $('foldedWrap');
+  const foldedEl = $('folded');
+  const foldedInner = $('foldedInner');
+  const frontClip = $('frontClip');
+  const seam    = $('seam');
+  const stripHit= $('stripHit');
+  const dragTag = $('dragTag');
+  const hint    = $('hint');
+  const letter  = $('letter');
+  const envBack = $('envBack');
+  const envLining = $('envLining');
+  const envFront= $('envFront');
+  const envShadow = $('envShadow');
+  const openGlow= $('openGlow');
+  const p1 = $('p1'), p3 = $('p3');
+  const packetCover = $('packetCover');
+  const shade1 = $('shade1'), shade3 = $('shade3');
+  const stackSheets = Array.from(document.querySelectorAll('.stack-sheet'));
+  const soundBtn = $('soundBtn');
+  const againBtn = $('againBtn');
+
+  let state = 'closed';   // closed → open → opening → done
+
+  /* ================= 纸张自适应 ================= */
+  function fit(){
+    const s = Math.min(window.innerWidth / 1010, window.innerHeight / 1010);
+    scene.style.transform = 'scale(' + Math.max(0.42, Math.min(1.45, s)) + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  /* ================= ② 锯齿撕边 =================
+     用固定种子生成一条抖动的折线；信封正面与撕条共用同一组点，
+     所以两边能严丝合缝咬在一起。                                */
+  function makeTearPoints(width, baseY, count, amp, seed0){
+    let seed = seed0;
+    const rnd = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const pts = [];
+    for (let i = 0; i <= count; i++){
+      const x = (width * i) / count;
+      // 每 4 个点起伏一次，形成一串小圆弧
+      const arc = Math.sin((i / 4) * Math.PI * 0.5) * amp * 0.62;
+      // 再叠一点随机抖动，像真的纸纤维
+      const jit = (rnd() - 0.5) * amp * 1.1;
+      pts.push({ x: x, y: baseY + arc + jit });
+    }
+    return pts;
+  }
+
+  const COUNT = 200;
+  const AMP = 3.6;
+  const tearPts = makeTearPoints(EW, ET, COUNT, AMP, SEED);
+
+  const px = n => n.toFixed(2) + 'px';
+  const fwd = tearPts.map(p => px(p.x) + ' ' + px(p.y)).join(', ');
+  const rev = tearPts.slice().reverse().map(p => px(p.x) + ' ' + px(p.y)).join(', ');
+
+  // 撕条：上边齐平，下边是锯齿
+  const stripClipPath = 'polygon(0px 0px, ' + px(EW) + ' 0px, ' + rev + ')';
+  stripClip.style.clipPath = stripClipPath;
+  foldedEl.style.clipPath = stripClipPath;      // 撕下来的那条用同一组点，翻折后依旧对得上
+  // 信封正面：上边是同一条锯齿，下边是信封底
+  frontClip.style.clipPath = 'polygon(' + fwd + ', ' + px(EW) + ' ' + px(EH) + ', 0px ' + px(EH) + ')';
+
+  // 接缝虚线：正好画在那条锯齿上
+  const d = 'M' + tearPts.map(p => p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' L ');
+  const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathEl.setAttribute('d', d);
+  seam.appendChild(pathEl);
+
+  /* ================= ④ 声音：撕纸 =================
+     撕纸 = 一层亮的噪声（纸纤维摩擦）+ 一层“咔哒”调制（纤维一根根崩断）。
+     调制信号是一段随机衰减尖峰，直接接到增益参数上，让噪声被掐成碎粒，
+     所以听起来是“嚓嚓嚓”的撕裂，而不是均匀的嘶嘶声。            */
+  const Audio = {
+    ctx: null, buf: null, crackle: null, muted: false,
+    init(){
+      if (this.ctx) return;
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      this.ctx = new C();
+      const sr = this.ctx.sampleRate;
+
+      // 噪声底
+      const b = this.ctx.createBuffer(1, Math.floor(sr * 1.2), sr);
+      const d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      this.buf = b;
+
+      // 断裂调制：一串随机出现的指数衰减尖峰
+      const cr = this.ctx.createBuffer(1, Math.floor(sr * 2.4), sr);
+      const e = cr.getChannelData(0);
+      for (let i = 0; i < e.length; i++) e[i] = 0.05 + Math.random() * 0.06;
+      let pos = 0;
+      while (pos < e.length){
+        pos += Math.floor(sr * (0.0015 + Math.random() * 0.011));
+        const len = Math.floor(sr * (0.0025 + Math.random() * 0.009));
+        const amp = 0.45 + Math.random() * 0.55;
+        for (let i = 0; i < len && pos + i < e.length; i++){
+          e[pos + i] += amp * Math.exp(-i / (len * 0.34));
+        }
+        pos += len;
+      }
+      for (let i = 0; i < e.length; i++) e[i] = Math.min(1, e[i]);
+      this.crackle = cr;
+    },
+    // vol：音量；bright：噪声带通中心（4k 左右最像纸）；dur：时长；rate：断裂密度
+    tear(vol, dur, bright, rate){
+      if (!this.ctx || this.muted || vol <= 0.0008) return;
+      const t = this.ctx.currentTime;
+
+      const s = this.ctx.createBufferSource();
+      s.buffer = this.buf; s.loop = true;
+      s.playbackRate.value = 0.9 + Math.random() * 0.45;
+
+      const hp = this.ctx.createBiquadFilter();
+      hp.type = 'highpass'; hp.frequency.value = 900;
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = bright || 3800; bp.Q.value = 0.7;
+      const lp = this.ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 10500; lp.Q.value = 0.4;
+
+      s.connect(hp); hp.connect(bp); bp.connect(lp);
+
+      const mod = this.ctx.createGain();
+      mod.gain.value = 0;                       // 音量完全交给断裂信号控制
+      lp.connect(mod);
+
+      const c = this.ctx.createBufferSource();
+      c.buffer = this.crackle; c.loop = true;
+      c.playbackRate.value = rate || 1;
+      const mlp = this.ctx.createBiquadFilter();
+      mlp.type = 'lowpass'; mlp.frequency.value = 260;
+      c.connect(mlp); mlp.connect(mod.gain);
+
+      const g = this.ctx.createGain();
+      const a = Math.max(0.012, dur * 0.16);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + a);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+      mod.connect(g); g.connect(this.ctx.destination);
+      s.start(t); c.start(t);
+      s.stop(t + dur + 0.06); c.stop(t + dur + 0.06);
+    },
+    // 拖动时的连续撕裂
+    rip(f){
+      const v = 0.08 + f * 0.17;
+      this.tear(v, 0.13 + f * 0.1, 3200 + Math.random() * 1600, 1.05 + f * 0.5);
+    },
+    // 撕到头：一串连续往下收的撕裂
+    finish(){
+      this.tear(0.38, 0.58, 4200, 1.3);
+      setTimeout(() => this.tear(0.20, 0.34, 3400, 0.95), 130);
+    },
+    // 抽出信纸：纸的沙沙
+    rustle(){
+      this.tear(0.20, 0.52, 2400, 0.75);
+    }
+  };
+
+  soundBtn.addEventListener('click', () => {
+    Audio.muted = !Audio.muted;
+    soundBtn.classList.toggle('off', Audio.muted);
+    soundBtn.textContent = Audio.muted ? '✕' : '♪';
+  });
+
+  /* ================= 动画小工具 ================= */
+  function anim(el, frames, dur, easing){
+    const a = el.animate(frames, {
+      duration: dur,
+      easing: easing || 'cubic-bezier(.34,.72,.2,1)',
+      fill: 'forwards'
+    });
+    return a.finished.then(() => {
+      try { a.commitStyles(); } catch (e) {}
+      try { a.cancel(); } catch (e) {}
+    });
+  }
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  /* ================= ③ 撕条：从右往左撕 + 翻折 180° =================
+     p = 已撕掉的比例（从右往左算）。剩下的一段留在信封上，
+     撕下来的那一截被翻折 180°，平躺在信封正面。           */
+  let drag = null, p = 0;
+
+  function setP(v){
+    p = Math.max(0, Math.min(1, v));
+    const peel = p * EW;                                   // 已撕掉宽度
+    stripRemain.style.clipPath = 'inset(0px ' + peel.toFixed(2) + 'px 0px 0px)';
+    foldedInner.style.clipPath = 'inset(0px 0px 0px ' + (EW - peel).toFixed(2) + 'px)';
+    seam.style.clipPath = 'inset(0px ' + peel.toFixed(2) + 'px 0px 0px)';
+    strip.style.setProperty('--sa', (p * 0.18).toFixed(3));
+  }
+  setP(0);   // 初始：整条封条还在
+
+  /* 把 p 平滑推到目标值 */
+  function tweenP(to, dur, ease){    const from = p, t0 = performance.now();
+    const f = ease || (t => 1 - Math.pow(1 - t, 3));
+    return new Promise(resolve => {
+      (function step(now){
+        const t = Math.min(1, (now - t0) / dur);
+        setP(from + (to - from) * f(t));
+        if (t < 1) requestAnimationFrame(step);
+        else resolve();
+      })(t0);
+    });
+  }
+
+  stripHit.addEventListener('pointerdown', e => {
+    if (state !== 'closed') return;
+    Audio.init();
+    if (Audio.ctx && Audio.ctx.state === 'suspended') Audio.ctx.resume();
+    const w = stripHit.getBoundingClientRect().width || EW;
+    drag = { x: e.clientX, y: e.clientY, w: w, t: performance.now(), last: 0, p0: p };
+    try { stripHit.setPointerCapture(e.pointerId); } catch (err) {}
+    stripHit.style.cursor = 'grabbing';
+    dragTag.classList.add('gone');
+    foldedWrap.style.setProperty('--foldA', 154);   // 撕的时候纸条是翘着的
+  });
+
+  stripHit.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = drag.x - e.clientX;                  // 向左为正
+    const dy = Math.max(0, drag.y - e.clientY);     // 顺便往上抬一点也算
+    setP((dx + dy * 0.45) / (drag.w * 0.62));
+
+    // 完全柔和的摩擦声：音量跟着撕的速度走
+    const now = performance.now();
+    const move = Math.abs(p - drag.p0);
+    if (now - drag.last > 95 && move > 0.008){
+      drag.last = now;
+      Audio.rip(Math.min(1, move * 2.6));
+      drag.p0 = p;
+    }
+  });
+
+  stripHit.addEventListener('pointerup', endDrag);
+  stripHit.addEventListener('pointercancel', endDrag);
+  stripHit.addEventListener('pointerleave', e => { if (drag && e.buttons === 0) endDrag(); });
+
+  function endDrag(){
+    if (!drag) return;
+    drag = null;
+    stripHit.style.cursor = '';
+    foldedWrap.style.setProperty('--foldA', 168);   // 松手回到自然的折角
+    // 松手判断：不到 1/3 自动复位，够 1/3 就自己撕到底
+    if (p >= 1 / 3) tearOff();
+    else springBack();
+  }
+
+  async function springBack(){
+    Audio.tear(0.10, 0.22, 3000, 0.85);
+    await tweenP(0, 460, t => 1 - Math.pow(1 - t, 3.4));
+    dragTag.classList.remove('gone');
+  }
+
+  async function tearOff(){
+    dragTag.classList.add('gone');
+    Audio.finish();
+    // 自己撕完剩下的一段
+    await tweenP(1, 260 + 240 * (1 - p), t => 1 - Math.pow(1 - t, 2.4));
+    // 撕下来的那条从正面滑落
+    await anim(foldedWrap, [
+      { translate: '0 0px', rotate: '0deg', opacity: 1 },
+      { translate: '0 40px', rotate: '1.4deg', opacity: 1, offset: .45 },
+      { translate: '0 150px', rotate: '4deg', opacity: 0 }
+    ], 560, 'cubic-bezier(.4,.1,.55,1)');
+
+    strip.style.display = 'none';
+    foldedWrap.style.display = 'none';
+    stripHit.classList.add('gone');
+    seam.style.clipPath = '';
+    seam.classList.add('torn');                 // 接缝变成撕开的浅色纸边
+    Audio.tear(0.07, 0.32, 2600, 0.8);
+
+    state = 'open';
+    hint.innerHTML = '点击信封，取出信纸<span class="dot">·</span>tap to open';
+    openGlow.classList.add('on');
+  }
+
+  /* ================= ⑤ 打开信：升起 → 信封让位 → 三折展开 ================= */
+  scene.addEventListener('click', () => {
+    if (state !== 'open') return;
+    openLetter();
+  });
+
+  /* 折页展开：转到 90°（侧面对着镜头、几乎看不见）的瞬间切换正反面 */
+  function unfoldPanel(panel, fromDeg, toDeg, dur, shade){
+    const a = panel.animate(
+      [{ rotate: 'x ' + fromDeg + 'deg' }, { rotate: 'x ' + toDeg + 'deg' }],
+      { duration: dur, easing: 'cubic-bezier(.42,0,.58,1)', fill: 'forwards' }
+    );
+    setTimeout(() => { panel.classList.add('flat'); }, dur / 2 - 70);
+    if (shade){
+      shade.animate([
+        { opacity: 0, offset: 0 },
+        { opacity: .42, offset: .45 },
+        { opacity: 0, offset: 1 }
+      ], { duration: dur, easing: 'ease-in-out', fill: 'forwards' });
+    }
+    return a.finished.then(() => {
+      try { a.commitStyles(); } catch (e) {}
+      try { a.cancel(); } catch (e) {}
+    });
+  }
+
+  async function openLetter(){
+    state = 'opening';
+    openGlow.classList.remove('on');
+    hint.classList.add('gone');
+    Audio.init();
+    Audio.rustle();
+
+    // 1) 信纸从信封里抽出来
+    await anim(letter, [
+      { translate: '0 250px' },
+      { translate: '0 60px' }
+    ], 900, 'cubic-bezier(.22,.86,.24,1)');
+
+    letter.classList.add('out');        // 换 z-index：信纸跑到信封正面之上
+    Audio.tear(0.06, 0.3, 2600, 0.8);
+
+    // 2) 信封下沉让位 + 上折页翻起来
+    packetCover.animate([{ opacity: 1 }, { opacity: 0 }],
+      { duration: 320, delay: 60, easing: 'ease-out', fill: 'forwards' });
+
+    await Promise.all([
+      anim(envBack,   [{ translate: '0 0px', scale: 1, opacity: 1 }, { translate: '0 200px', scale: .86, opacity: 0 }], 780, 'ease-in-out'),
+      anim(envFront,  [{ translate: '0 0px', scale: 1, opacity: 1 }, { translate: '0 200px', scale: .86, opacity: 0 }], 780, 'ease-in-out'),
+      anim(envLining, [{ translate: '0 0px', scale: 1, opacity: 1 }, { translate: '0 200px', scale: .86, opacity: 0 }], 780, 'ease-in-out'),
+      anim(envShadow, [{ translate: '0 0px', opacity: .9 }, { translate: '0 200px', opacity: .2 }], 780, 'ease-in-out'),
+      anim(seam,      [{ translate: '0 0px', opacity: 1 }, { translate: '0 200px', opacity: 0 }], 620, 'ease-in-out'),
+      unfoldPanel(p1, 180, 0, 860, shade1)
+    ]);
+
+    Audio.tear(0.04, 0.26, 2200, 0.7);
+
+    // 3) 下折页再翻下去
+    await unfoldPanel(p3, -180, 0, 860, shade3);
+
+    // 4) 叠在后面的纸 + 荧光笔划亮
+    revealStack();
+    sweepHighlights();
+
+    state = 'done';
+    againBtn.classList.add('show');
+  }
+
+  /* 越往下的纸往右下错开一点、多转一点 */
+  function revealStack(){
+    stackSheets.forEach((el, i) => {
+      anim(el, [
+        { opacity: 0, translate: '0px 0px', rotate: '0deg' },
+        { opacity: 1, translate: (10 + i * 9) + 'px ' + (10 + i * 9) + 'px', rotate: (2 + i * 1.6) + 'deg' }
+      ], 620, 'ease-out');
+    });
+  }
+
+  /* 荧光笔：背景宽度从 0 拉到 100% */
+  function sweepHighlights(){
+    const hls = document.querySelectorAll('.hl');
+    hls.forEach((el, i) => {
+      setTimeout(() => {
+        el.animate([
+          { backgroundSize: '0% 58%' },
+          { backgroundSize: '104% 58%' }
+        ], { duration: 520, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' });
+      }, 260 + i * 260);
+    });
+  }
+
+  /* ================= 重置 ================= */
+  againBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    location.reload();
+  });
+
+  /* 初始遮一下，避免首帧闪跳 */
+  scene.style.opacity = '0';
+  requestAnimationFrame(() => {
+    scene.style.transition = 'opacity .8s ease';
+    scene.style.opacity = '1';
+  });
+
+})();
+</script>
+</body>
+</html>
