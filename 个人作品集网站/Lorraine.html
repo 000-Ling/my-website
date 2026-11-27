@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lorraine — AI, images, and small things</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;900&family=Noto+Sans+SC:wght@300;400;500&display=swap">
+<style>
+:root{
+  --paper:#f6eedd;
+  --tint:#efe2c7;
+  --card:#fcf7ea;
+  --ink:#2e1714;
+  --ink2:#5b342a;
+  --cosmos:#3d1d18;
+  --blue:#a8c1d7;
+  --blue2:#8ba7c0;
+  --apricot:#b3492a;
+  --butter:#e6c274;
+  --line:rgba(46,23,20,.16);
+  --display:"Instrument Serif","Playfair Display",Georgia,"Songti SC",serif;
+  --serif-cn:"Noto Serif SC","Songti SC",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --script:"Instrument Serif",Georgia,serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--blue)}
+body{
+  margin:20px 34px;background:var(--paper);color:var(--ink);border-radius:30px;
+  font-family:var(--sans);font-weight:300;font-size:15px;line-height:1.85;
+  -webkit-font-smoothing:antialiased;overflow-x:clip;
+  box-shadow:inset 0 0 0 1px rgba(46,23,20,.12);
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:70;opacity:.055;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+::selection{background:var(--apricot);color:var(--paper)}
+a{color:inherit}
+img{display:block}
+
+.wrap{max-width:1280px;margin:0 auto;padding:0 clamp(26px,5vw,72px)}
+.mono{font-family:var(--mono)}
+
+/* ============ HERO ============ */
+.hero{position:relative;min-height:calc(100svh - 40px);display:flex;flex-direction:column;justify-content:center;
+  padding-block:clamp(60px,8vh,104px) clamp(30px,5vh,60px)}
+.hero-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(46,23,20,.5);margin-bottom:clamp(20px,4vh,42px)}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(20px,3.4vw,64px);align-items:center}
+.hero-left{display:flex;flex-direction:column;align-items:flex-start}
+
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink2);margin:0 0 10px}
+h1.name{
+  font-family:var(--display);font-weight:400;font-size:clamp(60px,10.6vw,168px);
+  line-height:.86;letter-spacing:-.028em;margin:0;color:var(--ink);
+}
+h1.name em{font-style:italic}
+.ell{position:relative;display:inline-block;margin:18px 0 0;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:lowercase;color:var(--ink2)}
+.ell svg{position:absolute;left:-26px;top:-6px;width:calc(100% + 48px);height:calc(100% + 16px);pointer-events:none}
+/* 名字下面的短线，像版面上的一道分隔 */
+.hero-rule{position:relative;flex:0 0 auto;height:clamp(64px,9vh,104px);margin:24px 0 0}
+.hero-rule::before{content:"";position:absolute;left:1px;top:0;height:100%;width:1px;
+  background:linear-gradient(to bottom,rgba(46,23,20,.3),rgba(46,23,20,.04))}
+.hero-lead{max-width:32ch;margin:26px 0 0;font-size:14.6px;line-height:1.95;color:rgba(46,23,20,.8)}
+.hero-lead b{font-weight:500}
+
+.index{display:flex;flex-wrap:wrap;gap:5px 13px;margin:32px 0 0;padding:0;list-style:none}
+.index a{font-family:var(--mono);font-size:8.8px;letter-spacing:.12em;text-transform:uppercase;
+  text-decoration:none;color:rgba(46,23,20,.62);display:inline-flex;gap:6px;align-items:baseline;transition:color .2s}
+.index a sup{font-size:8px;letter-spacing:.1em;color:var(--apricot)}
+.index a:hover{color:var(--ink)}
+
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+
+.btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--ink);border-radius:999px;
+  padding:10px 17px;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  background:transparent;color:var(--ink);cursor:pointer;text-decoration:none;
+  transition:background .22s,color .22s,transform .22s,border-color .22s}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn:active{transform:translateY(1px)}
+.btn--solid{background:var(--apricot);border-color:var(--apricot);color:var(--paper)}
+.btn--solid:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn--ghost{border-color:var(--line);color:var(--ink2)}
+
+/* 拼贴 */
+.collage{position:relative;aspect-ratio:1/1.06;max-width:500px;margin-left:auto;cursor:pointer}
+.c-blue{position:absolute;inset:9% 1% 8% 13%;background:var(--blue);transform:rotate(4.5deg);opacity:.95}
+.c-paper{position:absolute;inset:5% 7% 6% 5%;background:var(--card);transform:rotate(-2.6deg);
+  box-shadow:0 18px 36px rgba(46,23,20,.18);border:1px solid rgba(46,23,20,.06)}
+.c-main{position:absolute;left:8%;top:4%;width:78%;transform:rotate(-4.5deg);
+  box-shadow:0 22px 44px rgba(46,23,20,.28);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.c-main img{width:100%;aspect-ratio:4/5;object-fit:cover;
+  clip-path:polygon(1% 0%,97% 0%,100% 6%,98% 24%,100% 46%,97% 68%,100% 88%,96% 100%,78% 97%,56% 100%,34% 97%,12% 100%,2% 92%,0% 70%,3% 52%,0% 30%,3% 12%)}
+.collage:hover .c-main{transform:rotate(-3.2deg) translateY(-6px)}
+.c-tape{position:absolute;background:rgba(168,193,215,.88);height:20px;width:86px;transform:rotate(-5deg);
+  mix-blend-mode:multiply;box-shadow:0 1px 3px rgba(46,23,20,.12)}
+.c-tape.a{top:1%;left:24%}
+.c-tape.b{bottom:6%;left:4%;width:64px;transform:rotate(8deg);height:16px}
+.c-star{position:absolute;right:6%;top:-4%;width:66px;height:66px;background:var(--butter);transform:rotate(-12deg);
+  clip-path:polygon(50% 0%,58% 18%,75% 8%,72% 28%,92% 25%,78% 40%,100% 50%,78% 60%,92% 75%,72% 72%,75% 92%,58% 82%,50% 100%,42% 82%,25% 92%,28% 72%,8% 75%,22% 60%,0% 50%,22% 40%,8% 25%,28% 28%,25% 8%,42% 18%)}
+.c-stamp{position:absolute;right:-5%;top:44%;width:84px;height:84px;border:1.5px solid rgba(179,73,42,.7);
+  border-radius:50%;display:grid;place-items:center;text-align:center;transform:rotate(-14deg);
+  font-family:var(--mono);font-size:8px;letter-spacing:.12em;line-height:1.5;text-transform:uppercase;
+  color:rgba(179,73,42,.8);z-index:4}
+.c-note{position:absolute;left:3%;top:-7%;font-family:var(--script);font-style:italic;font-size:18px;
+  color:var(--ink2);transform:rotate(-6deg);white-space:nowrap;z-index:4}
+@media(max-width:1150px){.c-note,.c-stamp{display:none}}
+
+/* NOW 卡 */
+.hero-right{position:relative}
+.nowcard{position:relative;width:min(330px,82%);margin:-18px -4px 0 auto;background:var(--cosmos);color:var(--card);
+  padding:17px 20px 19px;transform:rotate(-2.4deg);box-shadow:0 16px 32px rgba(46,23,20,.28);z-index:3}
+.nowcard .lb{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue)}
+.nowcard p{margin:9px 0 0;font-size:12.5px;line-height:1.9;color:rgba(252,247,234,.92);letter-spacing:.01em;text-wrap:pretty}
+@media(max-width:900px){.nowcard{width:100%;margin:16px 0 0}}
+
+/* ============ 通用章节 ============ */
+.ch{padding-block:clamp(56px,8vw,104px);background:var(--paper);position:relative}
+.ch--tint{background:var(--tint)}
+.ch--dark{background:var(--cosmos);color:var(--card)}
+.ch--dark .head{border-top-color:rgba(252,247,234,.25)}
+.ch-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  border-top:1px solid var(--line);padding-top:12px;margin-bottom:clamp(24px,4vw,42px)}
+.ch-head .n{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;opacity:.7}
+.ch-head h2{font-family:var(--display);font-size:clamp(30px,4.4vw,50px);font-weight:400;margin:0;
+  letter-spacing:-.014em;line-height:1.14}
+.ch-head .en{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.5;margin-left:auto}
+.intro{max-width:56ch;margin:0 0 40px;font-size:14.5px;line-height:2.05;color:rgba(46,23,20,.7);letter-spacing:.01em}
+.ch--dark .intro{color:rgba(252,247,234,.72)}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(26px,4vw,60px);align-items:start}
+.claim{font-family:var(--display);font-size:clamp(25px,3.2vw,40px);line-height:1.34;letter-spacing:-.008em;margin:0}
+.claim em{font-style:italic;color:var(--apricot)}
+.beliefs{display:grid;gap:10px;margin:26px 0 0}
+.belief{background:var(--card);border:1px solid var(--line);padding:16px 18px 17px;transition:transform .3s,box-shadow .3s}
+.belief:hover{transform:translateX(4px);box-shadow:-4px 6px 0 rgba(168,193,215,.5)}
+.belief .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--apricot)}
+.belief b{display:block;font-family:var(--display);font-size:19px;font-weight:400;margin:4px 0 2px;letter-spacing:-.01em}
+.belief span{font-size:12.5px;line-height:1.9;color:rgba(46,23,20,.68)}
+
+.about-body .para{margin:0 0 14px;font-size:13.8px;line-height:2;color:rgba(46,23,20,.84)}
+.about-body .para b{font-weight:500}
+.langbar{display:flex;gap:6px;margin:0 0 18px}
+.langbtn{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  border:1px solid var(--line);background:transparent;padding:5px 11px;border-radius:999px;cursor:pointer;color:var(--ink2)}
+.langbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+/* WORK */
+.work{display:grid;gap:0;border-top:1px solid var(--line)}
+.proj{border-bottom:1px solid var(--line)}
+.proj-head{display:grid;grid-template-columns:58px 1fr auto;gap:22px;align-items:center;padding:30px 4px;
+  cursor:pointer;background:none;border:0;width:100%;text-align:left;font:inherit;color:inherit;transition:background .25s,padding .25s}
+.proj-head:hover{background:rgba(46,23,20,.035);padding-left:10px}
+.proj-no{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--apricot)}
+.proj-title{display:block}
+.proj-title h3{display:inline;font-family:var(--display);font-weight:400;font-size:clamp(24px,3vw,36px);margin:0;letter-spacing:-.012em;line-height:1.18}
+.proj-title .cn{display:inline;margin-left:12px;font-family:var(--serif-cn);font-size:12px;font-weight:600;opacity:.5;letter-spacing:.04em}
+.proj-title .one{display:block;font-size:13px;line-height:1.75;color:rgba(46,23,20,.6);margin-top:10px;max-width:66ch;letter-spacing:.005em}
+.plus{width:30px;height:30px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;
+  font-family:var(--mono);font-size:14px;transition:transform .35s,background .25s,color .25s}
+.proj.open .plus{transform:rotate(135deg);background:var(--apricot);color:var(--paper);border-color:var(--apricot)}
+.proj-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.2,.8,.2,1),opacity .4s;opacity:0}
+.proj.open .proj-body{opacity:1}
+.proj-inner{padding:0 4px 26px 68px;display:grid;grid-template-columns:1fr 1fr;gap:14px 30px}
+.field b{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--apricot);margin-bottom:3px}
+.field p{margin:0;font-size:12.8px;line-height:1.8;color:rgba(46,23,20,.82)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:rgba(46,23,20,.6)}
+
+/* EXPERIENCE */
+.tl{position:relative;padding-left:30px}
+.tl::before{content:"";position:absolute;left:5px;top:8px;bottom:70px;width:1px;
+  background:repeating-linear-gradient(180deg,rgba(252,247,234,.45) 0 6px,transparent 6px 12px)}
+.tl-item{position:relative;margin-bottom:clamp(26px,4vw,42px)}
+.tl-item::before{content:"";position:absolute;left:-29px;top:9px;width:9px;height:9px;border-radius:50%;background:var(--butter)}
+.tl-item .d{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--blue);text-transform:uppercase}
+.tl-item h3{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.6vw,30px);margin:4px 0 0;letter-spacing:-.01em}
+.tl-item .org{font-size:12px;color:rgba(252,247,234,.6);margin:2px 0 10px;font-family:var(--serif-cn)}
+.tl-item p{margin:0 0 8px;font-size:13.2px;line-height:1.85;max-width:64ch;color:rgba(252,247,234,.86)}
+.tl-item p b{color:var(--butter);font-weight:500}
+.big{font-family:var(--display);font-size:26px;color:var(--butter);margin-right:4px;letter-spacing:-.01em}
+.tl-quote{font-family:var(--display);font-style:italic;font-size:17px;color:var(--blue);margin-top:6px !important}
+
+/* NOTES */
+.notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.notes-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.notes-grid{grid-template-columns:1fr}}
+.note{background:var(--card);border:1px solid var(--line);padding:20px 20px 18px;cursor:pointer;
+  display:flex;flex-direction:column;gap:9px;text-align:left;font:inherit;color:inherit;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s;position:relative}
+.note:nth-child(2){transform:rotate(.9deg)}
+.note:nth-child(3){transform:rotate(-.7deg)}
+.note:hover{transform:rotate(0) translateY(-5px);box-shadow:0 16px 28px rgba(46,23,20,.14)}
+.note .meta{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--apricot)}
+.note h3{font-family:var(--display);font-weight:400;font-size:24px;line-height:1.15;margin:0;letter-spacing:-.015em}
+.note p{margin:0;font-size:12.5px;line-height:1.75;color:rgba(46,23,20,.7)}
+.note .more{margin-top:auto;padding-top:10px;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(46,23,20,.45)}
+
+/* LIFE */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+.chip{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--line);background:transparent;padding:6px 12px;border-radius:999px;cursor:pointer;color:var(--ink2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.wall{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:820px){.wall{grid-template-columns:repeat(2,1fr)}}
+.shot{background:var(--card);padding:8px 8px 0;border:1px solid var(--line);cursor:pointer;
+  box-shadow:0 12px 24px rgba(46,23,20,.12);transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s}
+.shot:nth-child(3n+1){transform:rotate(-1.6deg)}
+.shot:nth-child(3n+2){transform:rotate(1.4deg)}
+.shot:nth-child(3n){transform:rotate(.6deg)}
+.shot:hover{transform:rotate(0) translateY(-6px);box-shadow:0 22px 36px rgba(46,23,20,.2)}
+.shot img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:saturate(.72) contrast(1.04) sepia(.12)}
+.shot .cap{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 2px 9px}
+.shot .cap span{font-family:var(--display);font-style:italic;font-size:15px}
+.shot .cap i{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(46,23,20,.45);font-style:normal}
+.shot.hide{display:none}
+
+/* CONTACT */
+.contact{padding-block:clamp(70px,11vw,140px)}
+.contact-line{font-family:var(--display);font-weight:400;font-size:clamp(38px,7vw,96px);line-height:.98;
+  letter-spacing:-.03em;margin:0 0 34px}
+.contact-line em{font-style:italic;color:var(--butter)}
+.mailrow{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.mail{font-family:var(--display);font-size:clamp(20px,2.8vw,34px);letter-spacing:-.01em;padding-bottom:5px;
+  border-bottom:1.5px solid rgba(252,247,234,.45);text-decoration:none;transition:border-color .2s,color .2s}
+.mail:hover{border-color:var(--butter);color:var(--butter)}
+.contact .small{margin:22px 0 0;font-size:12.5px;line-height:1.9;color:rgba(252,247,234,.6)}
+.contact .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.ch--dark .btn{border-color:rgba(252,247,234,.4);color:var(--card)}
+.ch--dark .btn:hover{background:var(--card);color:var(--ink);border-color:var(--card)}
+.ch--dark .btn--solid{background:var(--butter);border-color:var(--butter);color:var(--ink)}
+.ch--dark .btn--solid:hover{background:var(--card);border-color:var(--card)}
+
+/* 下一章 */
+.next{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:clamp(34px,5vw,54px);
+  padding-top:16px;border-top:1px dashed var(--line);text-decoration:none;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(46,23,20,.55)}
+.ch--dark .next{border-top-color:rgba(252,247,234,.2);color:rgba(252,247,234,.6)}
+.next b{font-weight:400;color:var(--apricot)}
+.next:hover b,.next:hover{color:var(--ink)}
+.ch--dark .next:hover{color:var(--card)}
+
+footer{background:var(--cosmos);color:rgba(252,247,234,.55);padding:26px clamp(22px,5vw,64px) 74px;
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  border-radius:0 0 30px 30px}
+
+/* 悬浮控件 */
+.fab{position:fixed;right:26px;z-index:65;display:flex;gap:8px}
+.fab.sound{bottom:38px;right:40px}
+.totop{bottom:38px;right:auto;left:40px;opacity:0;pointer-events:none;transition:opacity .3s}
+.totop.on{opacity:1;pointer-events:auto}
+.fabbtn{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--card);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:999px;
+  cursor:pointer;box-shadow:0 8px 20px rgba(46,23,20,.14);display:inline-flex;gap:7px;align-items:center}
+.fabbtn .dot{width:6px;height:6px;border-radius:50%;background:var(--apricot);transition:background .2s}
+.fabbtn.off .dot{background:rgba(46,23,20,.25)}
+
+/* 灯箱 */
+.lb{position:fixed;inset:20px 34px;z-index:90;display:none;background:rgba(28,15,12,.94);border-radius:26px;
+  grid-template-rows:auto 1fr auto;padding:clamp(16px,3vw,34px) clamp(24px,4vw,54px)}
+.lb.on{display:grid}
+.lb-bar{display:flex;justify-content:space-between;align-items:center;color:rgba(252,247,234,.75);
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase}
+.lb-x{background:none;border:1px solid rgba(252,247,234,.35);color:var(--card);border-radius:999px;
+  width:34px;height:34px;font-family:var(--mono);font-size:13px;cursor:pointer;line-height:1}
+.lb-stage{display:grid;place-items:center;min-height:0;position:relative}
+.lb-img{max-height:70vh;max-width:min(860px,90vw);object-fit:contain;
+  border:11px solid var(--card);box-shadow:0 30px 70px rgba(0,0,0,.5);transform:rotate(-.8deg);
+  transition:opacity .25s,transform .35s}
+.lb-body{text-align:center;color:rgba(252,247,234,.8);padding-bottom:6px}
+.lb-body .cap{font-family:var(--display);font-style:italic;font-size:18px;color:var(--butter)}
+.lb-body .sub{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:4px}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(252,247,234,.3);
+  color:var(--card);width:42px;height:42px;border-radius:50%;cursor:pointer;font-family:var(--mono);font-size:14px}
+.lb-prev{left:0}
+.lb-next{right:0}
+
+/* 便签弹层 */
+.sheet{position:fixed;inset:0;z-index:90;display:none}
+.sheet.on{display:block}
+.sheet-bg{position:absolute;inset:0;background:rgba(28,15,12,.6)}
+.sheet-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-.7deg);
+  width:min(640px,90vw);max-height:82vh;overflow:auto;background:var(--card);
+  padding:clamp(24px,4vw,46px);box-shadow:0 30px 70px rgba(0,0,0,.4)}
+.sheet-card .meta{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--apricot)}
+.sheet-card h3{font-family:var(--display);font-weight:400;font-size:clamp(26px,3.6vw,40px);line-height:1.1;
+  margin:8px 0 18px;letter-spacing:-.02em}
+.sheet-card p{font-size:14px;line-height:2;margin:0 0 13px;color:rgba(46,23,20,.84)}
+.sheet-card .close{margin-top:22px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  border:1px solid var(--ink);background:none;padding:8px 14px;border-radius:999px;cursor:pointer}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,14px);z-index:95;
+  background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:38px}
+  .collage{max-width:360px;margin:0 auto;width:100%}
+  .about-grid{grid-template-columns:1fr;gap:34px}
+  .proj-inner{grid-template-columns:1fr;padding-left:4px}
+  .proj-head{grid-template-columns:34px 1fr auto}
+  body{margin:10px 14px;border-radius:18px}
+  footer{padding-bottom:56px;border-radius:0 0 18px 18px}
+  .fab.sound{right:20px;bottom:20px}
+  .totop{left:20px;bottom:20px}
+}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.lb-img{transform:none}}
+</style>
+</head>
+<body>
+<!-- ================= HERO ================= -->
+<header class="hero" id="home">
+  <div class="wrap">
+    <div class="hero-top">
+      <span>Portfolio · 2026 · Guilin, CN</span>
+      <span>AI · Images · Small things</span>
+    </div>
+
+    <div class="hero-grid">
+      <div class="hero-left">
+        <p class="kicker">Hello, I'm —</p>
+        <h1 class="name">Lorraine</h1>
+        <div class="ell">
+          a pocket of the internet, softly lit
+          <svg viewBox="0 0 320 70" preserveAspectRatio="none" aria-hidden="true">
+            <ellipse cx="160" cy="35" rx="157" ry="31" fill="none" stroke="#b3492a" stroke-width="1.6" transform="rotate(-1.4 160 35)"/>
+            <ellipse cx="160" cy="35" rx="151" ry="27" fill="none" stroke="#b3492a" stroke-width=".9" transform="rotate(2 160 35)" opacity=".55"/>
+          </svg>
+        </div>
+
+        <div class="hero-rule" aria-hidden="true"></div>
+
+        <ul class="index">
+          <li><a href="#about"><sup>01</sup>About</a></li>
+          <li><a href="#experience"><sup>02</sup>Experience</a></li>
+          <li><a href="#work"><sup>03</sup>Work</a></li>
+          <li><a href="#notes"><sup>04</sup>Notes</a></li>
+          <li><a href="#life"><sup>05</sup>Life</a></li>
+          <li><a href="#contact"><sup>06</sup>Hello</a></li>
+        </ul>
+
+        <div class="hero-cta">
+          <a class="btn btn--solid" href="#work">See the work <span>→</span></a>
+          <a class="btn" href="#contact">Say hello</a>
+        </div>
+      </div>
+
+      <div class="hero-right">
+      <div class="collage" id="collage" role="button" tabindex="0" aria-label="Open the photo">
+        <div class="c-blue"></div>
+        <div class="c-paper"></div>
+        <div class="c-main" data-full="assets/ling-portrait.jpg" data-cap="On the bus home, 6 pm light" data-sub="Guilin · 2026">
+          <img src="assets/ling-portrait.jpg" alt="Lorraine, portrait in warm afternoon light">
+        </div>
+        <div class="c-tape a"></div>
+        <div class="c-tape b"></div>
+        <div class="c-star"></div>
+        <div class="c-note">that's me</div>
+      </div>
+
+      <div class="nowcard">
+        <span class="lb">Now</span>
+        <p>用 AI 将脑海中的灵感一点点变成现实。修图、搭建、创作，每一次尝试都是一场有趣的探索。</p>
+      </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= ABOUT ================= -->
+<section class="ch" id="about">
+  <div class="wrap">
+    <div class="ch-head"><span class="n">01</span><h2>A little about me</h2><span class="en">关于我</span></div>
+
+    <div class="about-grid">
+      <div>
+        <p class="claim">I notice small things, ask too many questions, and turn <em>fuzzy ideas</em> into something you can hold.</p>
+
+        <div class="beliefs">
+          <div class="belief">
+            <span class="k">What I believe · 01</span>
+            <b>Stay open.</b>
+            <span>看到不懂的东西先试一下，再决定要不要喜欢。新工具不是威胁，是新玩具。</span>
+          </div>
+          <div class="belief">
+            <span class="k">What I believe · 02</span>
+            <b>Make it real.</b>
+            <span>想法只有在能被摸到的那一刻才算数。图纸、模型、一条视频，都算。</span>
+          </div>
+          <div class="belief">
+            <span class="k">What I believe · 03</span>
+            <b>Notice the small.</b>
+            <span>差 10% 的地方，通常就是全部的差别。90% 合格率不是及格线。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-body">
+        <div class="langbar">
+          <button class="langbtn" data-lang="en" aria-pressed="true">EN</button>
+          <button class="langbtn" data-lang="cn" aria-pressed="false">中文</button>
+        </div>
+
+        <div class="lang-en">
+          <p class="para">I'm Lorraine — Luo Ling, if you're reading the Chinese side — a final-year AI student in Guilin who keeps ending up in the gap between machines that see and stories that move people.</p>
+          <p class="para">Officially: machine vision, Python, Java, and how cars learn to read a road. Lately also: AI products — the small, unglamorous tools that take a boring hour out of someone's day. Unofficially: the same question, again and again — why did the model fail on <b>this</b> photo, and is the answer in the data or in my patience?</p>
+          <p class="para">I like work that leaves a mark. Three thousand audio clips labelled by hand, ninety percent of them clean — not because I hit the pass mark, but because I couldn't stand shipping something half-checked. Two hundred short videos for a high school nobody asked me to archive, and a filing system that quietly made everyone thirty percent faster.</p>
+          <p class="para">I'm quietly restless. I'd rather build one small, slightly odd thing than describe a big, perfect one. I read in two languages, greet people in three, photograph food the way other people collect stamps. And I care, more than I admit, about how things look — a good palette, a good outfit, a good page are the same craft.</p>
+          <p class="para" style="font-family:var(--display);font-style:italic;font-size:17px;color:var(--apricot)">This is a pocket of the internet. The light's on.</p>
+        </div>
+
+        <div class="lang-cn" hidden>
+          <p class="para">我叫罗铃，也可以叫我 Lorraine。桂林人，人工智能专业大四。我的位置一直有点窄：一半在让机器看见，一半在让人愿意看。</p>
+          <p class="para">正经地说，我学机器视觉、Python、Java，也学车怎么学会看路。最近也在做 AI 产品——那种不起眼的小工具，能把别人一天里无聊的一小时拿掉。不太正经地说，我老盯着同一张图问：为什么它偏偏在这张图上翻车？是数据的问题，还是我不够耐心？</p>
+          <p class="para">我喜欢做完的、看得见的东西。三千条音频，一条条听、一条条标，合格率 90%——不是及格线到了就交差，是我自己接受不了"差不多就行"。两百条校园短视频，没人要求我建归档库，但我建了，后来所有人找素材快了 30%。</p>
+          <p class="para">我不太安分，是安静的那种。比起描述一件很大的完美的事，我更愿意做出一件很小的、有点怪的东西。我用两种语言读书，用三种语言打招呼，拍食物照片像别人集邮。我也比嘴上承认的更在意好不好看——配色、穿搭、页面，其实是同一件事。</p>
+          <p class="para" style="font-family:var(--serif-cn);font-weight:600;font-size:16px;color:var(--apricot)">这里是网上的一小块地方。灯是亮的。</p>
+        </div>
+      </div>
+    </div>
+
+    <a class="next" href="#experience"><span>01 / About</span><b>Next — 02 Experience →</b></a>
+  </div>
+</section>
+
+<!-- ================= EXPERIENCE ================= -->
+<section class="ch ch--dark" id="experience">
+  <div class="wrap">
+    <div class="ch-head"><span class="n">02</span><h2>Where I've been</h2><span class="en">经历</span></div>
+    <p class="intro">不做 bullet points。两段实习，各留下一件我记得住的事。</p>
+
+    <div class="tl">
+      <div class="tl-item">
+        <span class="d">2026.04 — 2026.07</span>
+        <h3>Data Annotation Intern</h3>
+        <p class="org">广西智标科技有限公司 · 数据标注实习生</p>
+        <p><span class="big">3000+</span> 条语音数据的转写、分句与噪音标记，合格率做到 <b>90%</b>。</p>
+        <p>没有人要求，我自己加了一道复核流程：对照规范逐条校验、当场纠错，把"抽检合格"变成"交付合格"。</p>
+        <p class="tl-quote">90% 不是及格线，是我能接受的底线。</p>
+      </div>
+
+      <div class="tl-item">
+        <span class="d">2025.07 — 2025.09</span>
+        <h3>Media Operations Intern</h3>
+        <p class="org">南宁市华光高级中学 · 媒体运营实习</p>
+        <p>短视频全流程独立操盘——策划、拍摄、剪辑、字幕，产出 <span class="big">200+</span> 条，账号日更不断档。</p>
+        <p>顺手建了一套素材归档标准（分类、命名、检索），团队找素材的耗时少了 <b>30%</b>。</p>
+        <p class="tl-quote">日更教会我的不是快，是先想好。</p>
+      </div>
+
+      <div class="tl-item">
+        <span class="d">2023 — 2027</span>
+        <h3>B.Eng. · Artificial Intelligence</h3>
+        <p class="org">广西职业师范学院 · 本科</p>
+        <p>主修机器视觉、Python、Java 程序设计、MySQL、智能网联汽车技术。校级奖学金；CET-4 / CET-6；西班牙语基础问候。</p>
+      </div>
+    </div>
+
+    <a class="next" href="#work"><span>02 / Experience</span><b>Next — 03 Work →</b></a>
+  </div>
+</section>
+
+<!-- ================= WORK ================= -->
+<section class="ch ch--tint" id="work">
+  <div class="wrap">
+    <div class="ch-head"><span class="n">03</span><h2>Things I've made</h2><span class="en">项目</span></div>
+    <p class="intro">四个项目，四种问题。点开任何一个，能看到我为什么做、我负责了什么、最后长成什么样。</p>
+
+    <div class="work">
+      <div class="proj" data-proj>
+        <button class="proj-head" aria-expanded="false">
+          <span class="proj-no">P.01</span>
+          <span class="proj-title">
+            <h3>Defect Detective</h3><span class="cn">零件瑕疵侦探</span>
+            <span class="one">A model that learns what "broken" looks like.</span>
+          </span>
+          <span class="plus">+</span>
+        </button>
+        <div class="proj-body">
+          <div class="proj-inner">
+            <div class="field"><b>Why</b><p>质检不该只靠人眼盯到发酸。也想验证一件事：当缺陷样本少得可怜，到底该改模型，还是该改数据。</p></div>
+            <div class="field"><b>Role</b><p>采集并标注划痕、缺损两类图像；写脚本清洗与切分数据集；为工业场景设计数据增强；训练调优 YOLOv8，处理类别失衡。</p></div>
+            <div class="field"><b>Out</b><p>云端跑通训练与推理，实现零件外观缺陷自动识别。把"样本太少"这个死局，变成"数据可以怎么造"的开放题。</p></div>
+            <div class="field"><b>Shows</b><p>对数据的敏感度 ＋ 工程调优的耐心。</p></div>
+            <div class="tags" style="grid-column:1/-1"><span class="tag">YOLOv8</span><span class="tag">Data Augmentation</span><span class="tag">Industrial CV</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj" data-proj>
+        <button class="proj-head" aria-expanded="false">
+          <span class="proj-no">P.02</span>
+          <span class="proj-title">
+            <h3>Reading the World</h3><span class="cn">把世界读成文字</span>
+            <span class="one">Turning photos and foreign scans into text you can edit.</span>
+          </span>
+          <span class="plus">+</span>
+        </button>
+        <div class="proj-body">
+          <div class="proj-inner">
+            <div class="field"><b>Why</b><p>我自己要翻译资料，一张张手打太蠢。工具先做给自己用，通常最好用。</p></div>
+            <div class="field"><b>Role</b><p>基于 PaddleOCR 搭轻量化识别模型；写批量提取流程，把图片、外文扫描件里的文本整段导出。</p></div>
+            <div class="field"><b>Out</b><p>全文本提取并批量导出为可整理的结构化文本，直接接进翻译和文案整理的工作流。</p></div>
+            <div class="field"><b>Shows</b><p>从真实需求出发的产品直觉 ＋ 落地能力。</p></div>
+            <div class="tags" style="grid-column:1/-1"><span class="tag">PaddleOCR</span><span class="tag">AI Product</span><span class="tag">Workflow</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj" data-proj>
+        <button class="proj-head" aria-expanded="false">
+          <span class="proj-no">P.03</span>
+          <span class="proj-title">
+            <h3>The Polite Car</h3><span class="cn">会礼让的车</span>
+            <span class="one">Simulating a car that yields before it needs to.</span>
+          </span>
+          <span class="plus">+</span>
+        </button>
+        <div class="proj-body">
+          <div class="proj-inner">
+            <div class="field"><b>Why</b><p>自动驾驶的难点常常不在"能不能走"，而在"会不会让"。</p></div>
+            <div class="field"><b>Role</b><p>搭 Prescan 仿真环境；构建超车、礼让行人、静态避障三类工况；解析毫米波与激光雷达信号；调试轨迹控制；制定量化指标。</p></div>
+            <div class="field"><b>Out</b><p>三类工况跑通，采集到可对比的仿真数据，留下一份能复用的测试文档。</p></div>
+            <div class="field"><b>Shows</b><p>系统思维——把"感觉开得还行"翻译成可测量的指标。</p></div>
+            <div class="tags" style="grid-column:1/-1"><span class="tag">Prescan</span><span class="tag">MATLAB</span><span class="tag">Sensor Fusion</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj" data-proj>
+        <button class="proj-head" aria-expanded="false">
+          <span class="proj-no">P.04</span>
+          <span class="proj-title">
+            <h3>Small Inventions Shelf</h3><span class="cn">小发明柜</span>
+            <span class="one">Things I made because I wanted to know if I could.</span>
+          </span>
+          <span class="plus">+</span>
+        </button>
+        <div class="proj-body">
+          <div class="proj-inner">
+            <div class="field"><b>Why</b><p>就是想知道自己能不能做出来。没有别的理由，这一类最有意思。</p></div>
+            <div class="field"><b>Role</b><p>K210 寻物系统、人脸识别训练系统、JSP 留言板后台、一个开源网页系统，还有一座 3D 打印的天坛。</p></div>
+            <div class="field"><b>Out</b><p>四件能开机、能用、能摆在桌上的东西。</p></div>
+            <div class="field"><b>Shows</b><p>好奇心 ＋ 跨栈动手能力 ＋ 一点点浪漫——天坛是最没用的那个，也是我最想留下的那个。</p></div>
+            <div class="tags" style="grid-column:1/-1"><span class="tag">K210</span><span class="tag">Python</span><span class="tag">3D Print</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a class="next" href="#notes"><span>03 / Work</span><b>Next — 04 Notes →</b></a>
+  </div>
+</section>
+
+<!-- ================= NOTES ================= -->
+<section class="ch" id="notes">
+  <div class="wrap">
+    <div class="ch-head"><span class="n">04</span><h2>Notes to myself</h2><span class="en">想法</span></div>
+    <p class="intro">还没整理完的想法，先放在这里。点开能读全文（都还是草稿）。</p>
+
+    <div class="notes-grid">
+      <button class="note" data-note="0">
+        <span class="meta">Data · 2026.10 · Draft</span>
+        <h3>Why I index everything</h3>
+        <p>三千条音频教给我的不是耐心，是索引。当你能一眼找到那一条，你才敢慢下来做别的。</p>
+        <span class="more">Read →</span>
+      </button>
+
+      <button class="note" data-note="1">
+        <span class="meta">Language · 2026.09 · Draft</span>
+        <h3>Two ways to say one thing</h3>
+        <p>翻译不是换词，是换口气。同一句话，一个人说像道歉，另一个人说像邀请。</p>
+        <span class="more">Read →</span>
+      </button>
+
+      <button class="note" data-note="2">
+        <span class="meta">Making · 2026.08 · Draft</span>
+        <h3>After 200 videos</h3>
+        <p>日更不会让人变快，会让人变准。拍到第一百条我才知道，观众在前两秒就决定要不要留下。</p>
+        <span class="more">Read →</span>
+      </button>
+    </div>
+
+    <a class="next" href="#life"><span>04 / Notes</span><b>Next — 05 Life →</b></a>
+  </div>
+</section>
+
+<!-- ================= LIFE ================= -->
+<section class="ch ch--tint" id="life">
+  <div class="wrap">
+    <div class="ch-head"><span class="n">05</span><h2>Off the clock</h2><span class="en">生活</span></div>
+    <p class="intro">旅行、吃、和被光打到的东西。点一张封面，可以看大图。</p>
+
+    <div class="chips" role="group" aria-label="Filter">
+      <button class="chip" data-filter="all" aria-pressed="true">All</button>
+      <button class="chip" data-filter="travel" aria-pressed="false">Travel</button>
+      <button class="chip" data-filter="food" aria-pressed="false">Food</button>
+    </div>
+
+    <div class="wall" id="wall">
+      <figure class="shot" data-cat="travel" data-lb="life" data-full="assets/travel-1.jpg" data-cap="Breakfast at 6:40, sand still cold" data-sub="Travel · 2026">
+        <img src="assets/travel-1.jpg" alt="Breakfast by the sea"><div class="cap"><span>6:40 的海边早餐</span><i>Travel</i></div>
+      </figure>
+      <figure class="shot" data-cat="travel" data-lb="life" data-full="assets/travel-2.jpg" data-cap="A window, a sea, nobody around" data-sub="Travel · 2026">
+        <img src="assets/travel-2.jpg" alt="Sea through a window"><div class="cap"><span>窗边的下午</span><i>Travel</i></div>
+      </figure>
+      <figure class="shot" data-cat="travel" data-lb="life" data-full="assets/travel-3.jpg" data-cap="The sea refuses to stay quiet" data-sub="Travel · 2026">
+        <img src="assets/travel-3.jpg" alt="Waves"><div class="cap"><span>海不肯安静</span><i>Travel</i></div>
+      </figure>
+      <figure class="shot" data-cat="food" data-lb="life" data-full="assets/food-1.jpg" data-cap="A bowl of crayfish, for one" data-sub="Food · 2026">
+        <img src="assets/food-1.jpg" alt="Crayfish"><div class="cap"><span>一个人的小龙虾</span><i>Food</i></div>
+      </figure>
+      <figure class="shot" data-cat="food" data-lb="life" data-full="assets/food-2.jpg" data-cap="A runny egg saved the day" data-sub="Food · 2026">
+        <img src="assets/food-2.jpg" alt="Rice with egg"><div class="cap"><span>溏心蛋救了一天</span><i>Food</i></div>
+      </figure>
+      <figure class="shot" data-cat="food" data-lb="life" data-full="assets/food-3.jpg" data-cap="A dinner worth writing down" data-sub="Food · 2026">
+        <img src="assets/food-3.jpg" alt="Steak and pasta"><div class="cap"><span>值得记下来的一餐</span><i>Food</i></div>
+      </figure>
+    </div>
+
+    <a class="next" href="#contact"><span>05 / Life</span><b>Next — 06 Say hello →</b></a>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="ch ch--dark contact" id="contact">
+  <div class="wrap">
+    <div class="ch-head"><span class="n">06</span><h2>Say hello</h2><span class="en">联系方式</span></div>
+    <h2 class="contact-line">Let's make something <em>interesting.</em></h2>
+
+    <div class="mailrow">
+      <a class="mail" id="mail" href="mailto:2781157805@qq.com">2781157805@qq.com</a>
+      <button class="btn btn--ghost" id="copyMail">Copy</button>
+    </div>
+
+    <p class="small">
+      在找工作：AI 产品、机器视觉、内容与运营方向都看。<br>
+      微信 · 先发一封邮件，我把二维码回给你。简历可以直接下载。
+    </p>
+
+    <div class="btns">
+      <a class="btn btn--solid" href="assets/cv.pdf" target="_blank" rel="noopener" title="Curriculum vitae — one page, PDF">The short version ↓</a>
+      <a class="btn" href="mailto:2781157805@qq.com">Send an email</a>
+      <a class="btn" href="#home">Back to the top ↑</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Lorraine · 罗铃</span>
+  <span>Made with curiosity and too much patience</span>
+  <span>Guilin, CN</span>
+</footer>
+
+<!-- 悬浮 -->
+<div class="fab sound">
+  <button class="fabbtn" id="soundBtn" aria-pressed="true"><span class="dot"></span><span id="soundTxt">Sound on</span></button>
+</div>
+<div class="fab totop">
+  <button class="fabbtn" id="topBtn">↑ Top</button>
+</div>
+
+<!-- 灯箱 -->
+<div class="lb" id="lb" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="lb-bar">
+    <span id="lbCount">1 / 6</span>
+    <button class="lb-x" id="lbClose" aria-label="Close">×</button>
+  </div>
+  <div class="lb-stage">
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">←</button>
+    <img class="lb-img" id="lbImg" alt="">
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Next">→</button>
+  </div>
+  <div class="lb-body">
+    <div class="cap" id="lbCap"></div>
+    <div class="sub" id="lbSub"></div>
+  </div>
+</div>
+
+<!-- 便签 -->
+<div class="sheet" id="sheet" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="sheet-bg" data-close-sheet></div>
+  <div class="sheet-card">
+    <span class="meta" id="shMeta"></span>
+    <h3 id="shTitle"></h3>
+    <div id="shBody"></div>
+    <button class="close" data-close-sheet>Close ×</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s,c){ return (c||document).querySelector(s); };
+  var $$ = function(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+
+  /* ---------------- 声音：真实的翻纸声 ---------------- */
+  var Snd = (function(){
+    var on = true, els = [], i = 0, dead = false, src = "assets/paper-flip.mp3";
+    for(var k=0; k<4; k++){
+      var a = new Audio(); a.src = src; a.preload = "auto"; a.volume = 0.5;
+      a.addEventListener("error", function(){ dead = true; });
+      els.push(a);
+    }
+    function play(rate, vol){
+      if(!on || dead || !els.length) return;
+      var a = els[i++ % els.length];
+      try{
+        a.pause();
+        a.currentTime = 0;
+        a.playbackRate = rate;
+        a.volume = vol;
+        var pr = a.play();
+        if(pr && pr.catch){ pr.catch(function(){}); }
+      }catch(e){}
+    }
+    return {
+      tick:  function(){ play(1.42, 0.30); },
+      flip:  function(){ play(1.06, 0.44); },
+      open:  function(){ play(0.92, 0.50); },
+      close: function(){ play(1.18, 0.38); },
+      set: function(v){ on = v; return on; },
+      get: function(){ return on; }
+    };
+  })();
+
+  // 全局点击音：按钮、链接、可点卡片
+  document.addEventListener("pointerdown", function(e){
+    var t = e.target.closest("a, button, [data-lb], [data-note], .belief");
+    if(t) Snd.tick();
+  }, {passive:true});
+
+  /* ---------------- 声音开关 ---------------- */
+  var soundBtn = $("#soundBtn"), soundTxt = $("#soundTxt");
+  var saved = null;
+  try { saved = localStorage.getItem("lr_snd"); } catch(err){}
+  if(saved === "0"){ Snd.set(false); soundBtn.classList.add("off"); soundBtn.setAttribute("aria-pressed","false"); soundTxt.textContent = "Sound off"; }
+  soundBtn.addEventListener("click", function(){
+    var v = !Snd.get();
+    Snd.set(v);
+    soundBtn.classList.toggle("off", !v);
+    soundBtn.setAttribute("aria-pressed", v ? "true" : "false");
+    soundTxt.textContent = v ? "Sound on" : "Sound off";
+    try { localStorage.setItem("lr_snd", v ? "1" : "0"); } catch(err){}
+    if(v) Snd.tick();
+  });
+
+  /* ---------------- 滚动浮现 ---------------- */
+  var reveals = $$(".ch-head, .intro, .belief, .proj, .tl-item, .note, .shot");
+  if("IntersectionObserver" in window){
+    reveals.forEach(function(el){ el.classList.add("reveal"); });
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, {rootMargin:"0px 0px -8% 0px", threshold:.06});
+    reveals.forEach(function(el){ io.observe(el); });
+    // 兜底：首屏附近的元素若未触发，1.2 秒后强制可见（更远的交给滚动）
+    setTimeout(function(){
+      reveals.forEach(function(el){
+        if(el.getBoundingClientRect().top < window.innerHeight * 1.6) el.classList.add("in");
+      });
+    }, 1200);
+  }
+
+  /* ---------------- 项目手风琴 ---------------- */
+  $$("[data-proj]").forEach(function(p){
+    var head = $(".proj-head", p), body = $(".proj-body", p);
+    head.addEventListener("click", function(){
+      var open = p.classList.toggle("open");
+      head.setAttribute("aria-expanded", open ? "true" : "false");
+      body.style.maxHeight = open ? body.scrollHeight + "px" : "0px";
+      Snd.flip();
+    });
+    window.addEventListener("resize", function(){
+      if(p.classList.contains("open")) body.style.maxHeight = body.scrollHeight + "px";
+    });
+  });
+
+  /* ---------------- 语言切换 ---------------- */
+  $$(".langbtn").forEach(function(b){
+    b.addEventListener("click", function(){
+      var lang = b.getAttribute("data-lang");
+      $$(".langbtn").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      $(".lang-en").hidden = lang !== "en";
+      $(".lang-cn").hidden = lang !== "cn";
+      Snd.flip();
+    });
+  });
+
+  /* ---------------- 生活筛选 ---------------- */
+  $$(".chip").forEach(function(c){
+    c.addEventListener("click", function(){
+      var f = c.getAttribute("data-filter");
+      $$(".chip").forEach(function(x){ x.setAttribute("aria-pressed", x === c ? "true" : "false"); });
+      $$("#wall .shot").forEach(function(s){
+        s.classList.toggle("hide", f !== "all" && s.getAttribute("data-cat") !== f);
+      });
+      Snd.flip();
+    });
+  });
+
+  /* ---------------- 图片灯箱 ---------------- */
+  var lb = $("#lb"), lbImg = $("#lbImg"), lbCap = $("#lbCap"), lbSub = $("#lbSub"), lbCount = $("#lbCount");
+  var group = [], gi = 0;
+
+  function collect(name){
+    if(name === "hero"){
+      var c = document.getElementById("collage");
+      return c ? $$("[data-full]", c) : [];
+    }
+    return $$('[data-lb="' + name + '"]').filter(function(el){ return el.getAttribute("data-full"); });
+  }
+  function paint(){
+    var el = group[gi];
+    lbImg.style.opacity = 0;
+    setTimeout(function(){
+      lbImg.src = el.getAttribute("data-full");
+      lbImg.alt = el.getAttribute("data-cap") || "";
+      lbCap.textContent = el.getAttribute("data-cap") || "";
+      lbSub.textContent = el.getAttribute("data-sub") || "";
+      lbCount.textContent = (gi+1) + " / " + group.length;
+      lbImg.style.opacity = 1;
+    }, 120);
+  }
+  function openLb(name, el){
+    group = collect(name);
+    gi = Math.max(0, group.indexOf(el));
+    if(!group.length) return;
+    paint();
+    lb.classList.add("on");
+    lb.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+    Snd.open();
+  }
+  function closeLb(){
+    lb.classList.remove("on");
+    lb.setAttribute("aria-hidden","true");
+    document.body.style.overflow = "";
+    Snd.close();
+  }
+  function step(d){
+    if(!group.length) return;
+    gi = (gi + d + group.length) % group.length;
+    paint(); Snd.flip();
+  }
+  $$("[data-lb]").forEach(function(el){
+    if(!el.getAttribute("data-full")) return;
+    el.addEventListener("click", function(e){ e.preventDefault(); openLb(el.getAttribute("data-lb"), el); });
+    el.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openLb(el.getAttribute("data-lb"), el); } });
+  });
+  $("#lbClose").addEventListener("click", closeLb);
+  $("#lbPrev").addEventListener("click", function(){ step(-1); });
+  $("#lbNext").addEventListener("click", function(){ step(1); });
+  lb.addEventListener("click", function(e){ if(e.target === lb) closeLb(); });
+
+  /* ---------------- 便签 ---------------- */
+  var notes = [
+    {
+      meta: "Data · 2026.10 · Draft",
+      title: "Why I index everything",
+      body: "<p>三千条音频教给我的不是耐心，是索引。当你能一眼找到那一条，你才敢慢下来做别的。</p><p>我以前以为标注是体力活。做到第五百条才发现，真正难的是判断标准：这条噪音算不算噪音？口音算不算错误？每一次判断都在给自己写规则。</p><p>后来我建了一套自己的对照表——不是为了交差，是为了让第二天早上的我不用重新想一遍。工具的意义大概就在这里：把犹豫变成一次性的。</p>"
+    },
+    {
+      meta: "Language · 2026.09 · Draft",
+      title: "Two ways to say one thing",
+      body: "<p>翻译不是换词，是换口气。同一句话，一个人说像道歉，另一个人说像邀请。</p><p>我做过一段时间的外文扫描件识别，把纸上的英文变成能编辑的字。字是拿回来了，但语气丢了——原来那句「We'd be glad to」，机器译成「我们会很高兴」，礼貌被压成了一条直线。</p><p>所以我现在读两种语言的时候，会多问一句：这句话是站着说的，还是笑着说的。</p>"
+    },
+    {
+      meta: "Making · 2026.08 · Draft",
+      title: "After 200 videos",
+      body: "<p>日更不会让人变快，会让人变准。拍到第一百条我才知道，观众在前两秒就决定要不要留下。</p><p>那两个月我拍了两百条校园短视频：策划、拍摄、剪辑、字幕，全是我一个人。最大的收获不是熟练，是判断——哪一段可以删，哪一个镜头必须留三秒。</p><p>现在做页面、做项目图，用的还是同一双眼睛。删掉一个多余的元素，和剪掉一秒钟，是同一种快感。</p>"
+    }
+  ];
+  var sheet = $("#sheet"), shMeta = $("#shMeta"), shTitle = $("#shTitle"), shBody = $("#shBody");
+  $$("[data-note]").forEach(function(n){
+    n.addEventListener("click", function(){
+      var d = notes[+n.getAttribute("data-note")];
+      shMeta.textContent = d.meta;
+      shTitle.textContent = d.title;
+      shBody.innerHTML = d.body;
+      sheet.classList.add("on");
+      sheet.setAttribute("aria-hidden","false");
+      document.body.style.overflow = "hidden";
+      Snd.open();
+    });
+  });
+  $$("[data-close-sheet]").forEach(function(b){
+    b.addEventListener("click", function(){
+      sheet.classList.remove("on");
+      sheet.setAttribute("aria-hidden","true");
+      document.body.style.overflow = "";
+      Snd.close();
+    });
+  });
+
+  /* ---------------- 复制邮箱 ---------------- */
+  var toast = $("#toast");
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add("on");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ toast.classList.remove("on"); }, 1800);
+  }
+  $("#copyMail").addEventListener("click", function(){
+    var mail = "2781157805@qq.com";
+    var done = function(){ showToast("Copied — see you in the inbox"); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(mail).then(done).catch(function(){ showToast(mail); });
+    } else { showToast(mail); }
+    Snd.tick();
+  });
+
+  /* ---------------- 回到顶部 & 键盘 ---------------- */
+  var topBtn = $("#topBtn");
+  window.addEventListener("scroll", function(){
+    topBtn.classList.toggle("on", window.scrollY > 700);
+  }, {passive:true});
+  topBtn.addEventListener("click", function(){
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(lb.classList.contains("on")){
+      if(e.key === "Escape") closeLb();
+      if(e.key === "ArrowRight") step(1);
+      if(e.key === "ArrowLeft") step(-1);
+    } else if(sheet.classList.contains("on")){
+      if(e.key === "Escape"){
+        sheet.classList.remove("on"); sheet.setAttribute("aria-hidden","true");
+        document.body.style.overflow = "";
+      }
+    }
+  });
+
+  /* ---------------- 首屏拼贴整体可点 ---------------- */
+  var collage = $("#collage");
+  if(collage){
+    collage.addEventListener("click", function(e){
+      var t = e.target.closest("[data-full]") || $(".c-main", collage);
+      openLb("hero", t);
+    });
+    collage.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openLb("hero", $(".c-main", collage)); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
